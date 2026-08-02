@@ -283,3 +283,74 @@ function resetGame() {
   game.log = [];
   render();
 }
+
+// ---- 状態セット & レンダリング ----
+
+function setState(state) {
+  game.state = state;
+  render();
+}
+
+function render() {
+  renderHeader();
+  renderModeBadge();
+  renderMainScreen();
+  renderRushStats();
+}
+
+function renderHeader() {
+  const mochiInt = Math.floor(game.mochiDama);
+  document.getElementById('mochi-dama').textContent = mochiInt.toLocaleString();
+  document.getElementById('toushi-value').textContent = game.toushi.toLocaleString();
+
+  const shuushi = Math.round(mochiInt * game.rentalRate) - game.toushi;
+  const shuushiEl = document.getElementById('shuushi-value');
+  shuushiEl.textContent = (shuushi >= 0 ? '+' : '') + shuushi.toLocaleString();
+  shuushiEl.className = 'money-value ' + (shuushi >= 0 ? 'green' : 'red');
+  document.getElementById('current-spins').textContent = game.currentSpins.toLocaleString();
+  document.getElementById('total-spins-disp').textContent = game.totalSpins.toLocaleString();
+
+  const rushCountEl = document.getElementById('rush-count');
+  rushCountEl.textContent = game.rush ? `${game.rush.logicState.jitanRemaining}回` : '－';
+
+  document.getElementById('total-hit-count').textContent = (game.normalHitCount + game.totalRushHits) + '回';
+  document.getElementById('normal-first-hit').textContent = game.normalHitCount + '回';
+  document.getElementById('normal-first-prob').textContent = game.normalHitCount > 0 && game.totalSpins > 0
+    ? '1/' + Math.round(game.totalSpins / game.normalHitCount).toLocaleString()
+    : '1/―';
+
+  document.getElementById('rush-entry-count').textContent = game.rushEntryCount + '回';
+  const rushEntryRate = game.normalHitCount > 0 ? Math.round(game.rushEntryCount / game.normalHitCount * 100) : 0;
+  document.getElementById('rush-entry-info').textContent = `(突入率 ${rushEntryRate}%)`;
+
+  document.getElementById('fee-block').textContent = `${game.rentalRate.toFixed(1)}円`;
+}
+
+function renderModeBadge() {
+  const el = document.getElementById('mode-badge');
+  if (game.mode === 'sr') {
+    el.textContent = 'SR中';
+    el.className = 'rush';
+  } else if (game.mode === 'wou') {
+    el.textContent = 'WoU中';
+    el.className = 'rush';
+  } else {
+    el.textContent = '通常時';
+    el.className = '';
+  }
+}
+
+function renderMainScreen() {
+  document.getElementById('main-screen').innerHTML = buildScreen(game.state);
+}
+
+function rentalRateOptionsHtml() {
+  return RENTAL_RATE_TABLE.map(r =>
+    `<option value="${r.yenPerBall}" ${r.yenPerBall === game.rentalRate ? 'selected' : ''}>${r.yenPerBall.toFixed(1)}円${r.yenPerBall === DEFAULT_RENTAL_RATE ? '（等価）' : ''}</option>`
+  ).join('');
+}
+
+function tenThousandYenSpins() {
+  const entry = RENTAL_RATE_TABLE.find((r) => r.yenPerBall === game.rentalRate);
+  return Math.round(entry.spinsPerThousandYen * 10);
+}
