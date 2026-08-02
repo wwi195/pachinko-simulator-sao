@@ -81,3 +81,42 @@ test('spinWou returns sword_drive when type draw lands at 60%+', () => {
   const result = withMockRandom([0, 0.999], () => logic.spinWou());
   assert.equal(result, 'sword_drive');
 });
+
+test('resolveSwordDrive route A with 0 hold hits pays preceding + 1500', () => {
+  // route selector >= 0.025 (route A), then 4 hold draws all miss (>= 1/2.17)
+  const result = withMockRandom([0.5, 0.5, 0.5, 0.5, 0.5], () => logic.resolveSwordDrive(0));
+  assert.equal(result, 1500);
+});
+
+test('resolveSwordDrive route A with 4 hold hits pays preceding + 7500', () => {
+  const result = withMockRandom([0.5, 0, 0, 0, 0], () => logic.resolveSwordDrive(0));
+  assert.equal(result, 7500);
+});
+
+test('resolveSwordDrive route A with 2 hold hits pays preceding + 4500', () => {
+  const result = withMockRandom([0.5, 0, 0.5, 0, 0.5], () => logic.resolveSwordDrive(0));
+  assert.equal(result, 4500);
+});
+
+test('resolveSwordDrive route A adds precedingBonus on top (SR sake_hanatachi case)', () => {
+  const result = withMockRandom([0.5, 0.5, 0.5, 0.5, 0.5], () => logic.resolveSwordDrive(1500));
+  assert.equal(result, 1500 + 1500);
+});
+
+test('resolveSwordDrive route B bonus branch pays preceding + 3000', () => {
+  // route selector < 0.025 (route B), then branch selector < 0.6 (bonus)
+  const result = withMockRandom([0, 0.1], () => logic.resolveSwordDrive(0));
+  assert.equal(result, 3000);
+});
+
+test('resolveSwordDrive route B retry branch recurses with precedingBonus 0', () => {
+  // route B, retry branch, then recursive call lands in route A with 0 hits
+  const result = withMockRandom([0, 0.9, 0.5, 0.5, 0.5, 0.5, 0.5], () => logic.resolveSwordDrive(0));
+  assert.equal(result, 1500);
+});
+
+test('resolveSwordDrive route B retry accumulates precedingBonus across recursion', () => {
+  // route B retry, then recursive call also hits route B bonus branch
+  const result = withMockRandom([0, 0.9, 0, 0.1], () => logic.resolveSwordDrive(1500));
+  assert.equal(result, 1500 + 3000);
+});
