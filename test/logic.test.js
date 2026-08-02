@@ -66,3 +66,18 @@ test('spinSr returns sake_hanatachi when type draw lands at 89%+', () => {
   const result = withMockRandom([0, 0.999], () => logic.spinSr());
   assert.equal(result, 'sake_hanatachi');
 });
+
+test('spinWou returns miss when the hit draw is at the high end', () => {
+  const result = withMockRandom([0.999], () => logic.spinWou());
+  assert.equal(result, 'miss');
+});
+
+test('spinWou returns 10R when type draw lands under 60%', () => {
+  const result = withMockRandom([0, 0], () => logic.spinWou());
+  assert.equal(result, '10R');
+});
+
+test('spinWou returns sword_drive when type draw lands at 60%+', () => {
+  const result = withMockRandom([0, 0.999], () => logic.spinWou());
+  assert.equal(result, 'sword_drive');
+});

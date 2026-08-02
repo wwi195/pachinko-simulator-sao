@@ -29,6 +29,17 @@ function spinSr() {
   return 'miss';
 }
 
+function rollWouHitType() {
+  const r = Math.random() * 100;
+  if (r < 60.0) return '10R';
+  return 'sword_drive';
+}
+
+function spinWou() {
+  if (Math.random() < P_RUSH_HIT) return rollWouHitType();
+  return 'miss';
+}
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     P_NORMAL_HIT,
@@ -37,5 +48,7 @@ if (typeof module !== 'undefined' && module.exports) {
     P_RUSH_HIT,
     rollSrHitType,
     spinSr,
+    rollWouHitType,
+    spinWou,
   };
 }
