@@ -120,3 +120,10 @@ test('resolveSwordDrive route B retry accumulates precedingBonus across recursio
   const result = withMockRandom([0, 0.9, 0, 0.1], () => logic.resolveSwordDrive(1500));
   assert.equal(result, 1500 + 3000);
 });
+
+test('toActualBalls converts nominal payout to actual (14/15)', () => {
+  assert.equal(logic.toActualBalls(300), 280);
+  assert.equal(logic.toActualBalls(1500), 1400);
+  assert.equal(logic.toActualBalls(3000), 2800);
+  assert.equal(logic.toActualBalls(0), 0);
+});

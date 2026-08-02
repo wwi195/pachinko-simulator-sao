@@ -62,6 +62,10 @@ function resolveSwordDrive(precedingBonus) {
   return precedingBonus + SWORD_DRIVE_BASE + HOLD_HIT_BONUS * hitCount;
 }
 
+function toActualBalls(nominal) {
+  return nominal - nominal / 15;
+}
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     P_NORMAL_HIT,
@@ -79,5 +83,6 @@ if (typeof module !== 'undefined' && module.exports) {
     HOLD_HIT_BONUS,
     SWORD_DRIVE_BASE,
     resolveSwordDrive,
+    toActualBalls,
   };
 }
