@@ -14,10 +14,28 @@ function spinNormal() {
   return 'miss';
 }
 
+const P_RUSH_HIT = 1 / 51.6;
+
+function rollSrHitType() {
+  const r = Math.random() * 100;
+  if (r < 45.0) return '10R_no_kessui';
+  if (r < 45.0 + 33.0) return '10R_kessui_fail';
+  if (r < 45.0 + 33.0 + 11.0) return '10R_kessui_success';
+  return 'sake_hanatachi';
+}
+
+function spinSr() {
+  if (Math.random() < P_RUSH_HIT) return rollSrHitType();
+  return 'miss';
+}
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     P_NORMAL_HIT,
     rollNormalHitType,
     spinNormal,
+    P_RUSH_HIT,
+    rollSrHitType,
+    spinSr,
   };
 }
