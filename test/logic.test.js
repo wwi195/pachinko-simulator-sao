@@ -215,3 +215,23 @@ test('applySpin: WoU sword_drive stays in WoU at 70 jitan with sword drive payou
   assert.equal(actual, 1400);
   assert.deepEqual(newState, { mode: 'wou', jitanRemaining: 70 });
 });
+
+test('RENTAL_RATE_TABLE lists the five published rates with balls-per-100-yen and spins-per-1000-yen', () => {
+  assert.deepEqual(logic.RENTAL_RATE_TABLE, [
+    { yenPerBall: 4.0, ballsPerHundredYen: 25, spinsPerThousandYen: 20.0 },
+    { yenPerBall: 3.5, ballsPerHundredYen: 28, spinsPerThousandYen: 21.0 },
+    { yenPerBall: 3.3, ballsPerHundredYen: 30, spinsPerThousandYen: 21.6 },
+    { yenPerBall: 3.0, ballsPerHundredYen: 33, spinsPerThousandYen: 22.5 },
+    { yenPerBall: 2.5, ballsPerHundredYen: 40, spinsPerThousandYen: 24.4 },
+  ]);
+  assert.equal(logic.DEFAULT_RENTAL_RATE, 4.0);
+});
+
+test('calcBallsPerSpin derives balls consumed per spin from the rate table', () => {
+  assert.equal(logic.calcBallsPerSpin(4.0), (1000 / 4.0) / 20.0);
+  assert.equal(logic.calcBallsPerSpin(2.5), (1000 / 2.5) / 24.4);
+});
+
+test('calcBallsPerSpin throws for a rate not in the table', () => {
+  assert.throws(() => logic.calcBallsPerSpin(1.0));
+});

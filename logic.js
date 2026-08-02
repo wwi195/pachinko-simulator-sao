@@ -121,6 +121,21 @@ function applySpin(state) {
   return buildResult({ mode: 'wou', jitanRemaining: 70 }, outcome, nominal);
 }
 
+const RENTAL_RATE_TABLE = [
+  { yenPerBall: 4.0, ballsPerHundredYen: 25, spinsPerThousandYen: 20.0 },
+  { yenPerBall: 3.5, ballsPerHundredYen: 28, spinsPerThousandYen: 21.0 },
+  { yenPerBall: 3.3, ballsPerHundredYen: 30, spinsPerThousandYen: 21.6 },
+  { yenPerBall: 3.0, ballsPerHundredYen: 33, spinsPerThousandYen: 22.5 },
+  { yenPerBall: 2.5, ballsPerHundredYen: 40, spinsPerThousandYen: 24.4 },
+];
+const DEFAULT_RENTAL_RATE = 4.0;
+
+function calcBallsPerSpin(yenPerBall) {
+  const entry = RENTAL_RATE_TABLE.find((r) => r.yenPerBall === yenPerBall);
+  if (!entry) throw new Error(`Unknown rental rate: ${yenPerBall}`);
+  return (1000 / entry.yenPerBall) / entry.spinsPerThousandYen;
+}
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     P_NORMAL_HIT,
@@ -141,5 +156,8 @@ if (typeof module !== 'undefined' && module.exports) {
     toActualBalls,
     createInitialState,
     applySpin,
+    RENTAL_RATE_TABLE,
+    DEFAULT_RENTAL_RATE,
+    calcBallsPerSpin,
   };
 }
