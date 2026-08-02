@@ -66,6 +66,61 @@ function toActualBalls(nominal) {
   return nominal - nominal / 15;
 }
 
+function createInitialState() {
+  return { mode: 'normal', jitanRemaining: 0 };
+}
+
+function fallbackState(mode, jitanRemaining) {
+  if (jitanRemaining > 0) return { mode, jitanRemaining };
+  return { mode: 'normal', jitanRemaining: 0 };
+}
+
+function buildResult(state, outcome, nominal) {
+  return { state, outcome, nominal, actual: toActualBalls(nominal) };
+}
+
+function applySpin(state) {
+  if (state.mode === 'normal') {
+    const outcome = spinNormal();
+    if (outcome === 'miss') {
+      return buildResult({ mode: 'normal', jitanRemaining: 0 }, outcome, 0);
+    }
+    if (outcome === 'boku_no_hero') {
+      const nominal = resolveSwordDrive(1500);
+      return buildResult({ mode: 'wou', jitanRemaining: 70 }, outcome, nominal);
+    }
+    if (outcome === 'niR_53') {
+      return buildResult({ mode: 'sr', jitanRemaining: 53 }, outcome, 300);
+    }
+    return buildResult({ mode: 'normal', jitanRemaining: 0 }, outcome, 300);
+  }
+
+  if (state.mode === 'sr') {
+    const outcome = spinSr();
+    if (outcome === 'miss') {
+      return buildResult(fallbackState('sr', state.jitanRemaining - 1), outcome, 0);
+    }
+    if (outcome === '10R_no_kessui' || outcome === '10R_kessui_fail') {
+      return buildResult({ mode: 'sr', jitanRemaining: 53 }, outcome, 1500);
+    }
+    if (outcome === '10R_kessui_success') {
+      return buildResult({ mode: 'wou', jitanRemaining: 70 }, outcome, 1500);
+    }
+    const nominal = resolveSwordDrive(1500);
+    return buildResult({ mode: 'wou', jitanRemaining: 70 }, outcome, nominal);
+  }
+
+  const outcome = spinWou();
+  if (outcome === 'miss') {
+    return buildResult(fallbackState('wou', state.jitanRemaining - 1), outcome, 0);
+  }
+  if (outcome === '10R') {
+    return buildResult({ mode: 'wou', jitanRemaining: 70 }, outcome, 1500);
+  }
+  const nominal = resolveSwordDrive(0);
+  return buildResult({ mode: 'wou', jitanRemaining: 70 }, outcome, nominal);
+}
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     P_NORMAL_HIT,
@@ -84,5 +139,7 @@ if (typeof module !== 'undefined' && module.exports) {
     SWORD_DRIVE_BASE,
     resolveSwordDrive,
     toActualBalls,
+    createInitialState,
+    applySpin,
   };
 }

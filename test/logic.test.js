@@ -127,3 +127,91 @@ test('toActualBalls converts nominal payout to actual (14/15)', () => {
   assert.equal(logic.toActualBalls(3000), 2800);
   assert.equal(logic.toActualBalls(0), 0);
 });
+
+test('createInitialState starts in normal mode with 0 jitan', () => {
+  assert.deepEqual(logic.createInitialState(), { mode: 'normal', jitanRemaining: 0 });
+});
+
+test('applySpin: normal miss stays in normal mode', () => {
+  const state = logic.createInitialState();
+  const { state: newState, outcome, nominal, actual } = withMockRandom([0.999], () => logic.applySpin(state));
+  assert.equal(outcome, 'miss');
+  assert.equal(nominal, 0);
+  assert.equal(actual, 0);
+  assert.deepEqual(newState, { mode: 'normal', jitanRemaining: 0 });
+});
+
+test('applySpin: normal niR_53 enters SR with 53 jitan and 300/280 payout', () => {
+  const state = logic.createInitialState();
+  const { state: newState, outcome, nominal, actual } = withMockRandom([0, 0.02], () => logic.applySpin(state));
+  assert.equal(outcome, 'niR_53');
+  assert.equal(nominal, 300);
+  assert.equal(actual, 280);
+  assert.deepEqual(newState, { mode: 'sr', jitanRemaining: 53 });
+});
+
+test('applySpin: normal boku_no_hero jumps to WoU with sword drive payout', () => {
+  const state = logic.createInitialState();
+  // hit(0) -> type draw(0, boku_no_hero) -> resolveSwordDrive(1500): route A(0.5), 0 hold hits
+  const { state: newState, outcome, nominal, actual } = withMockRandom(
+    [0, 0, 0.5, 0.5, 0.5, 0.5, 0.5],
+    () => logic.applySpin(state)
+  );
+  assert.equal(outcome, 'boku_no_hero');
+  assert.equal(nominal, 1500 + 1500);
+  assert.equal(actual, logic.toActualBalls(3000));
+  assert.deepEqual(newState, { mode: 'wou', jitanRemaining: 70 });
+});
+
+test('applySpin: SR miss decrements jitanRemaining and stays in SR', () => {
+  const state = { mode: 'sr', jitanRemaining: 53 };
+  const { state: newState, outcome } = withMockRandom([0.999], () => logic.applySpin(state));
+  assert.equal(outcome, 'miss');
+  assert.deepEqual(newState, { mode: 'sr', jitanRemaining: 52 });
+});
+
+test('applySpin: SR miss on last jitan spin falls back to normal', () => {
+  const state = { mode: 'sr', jitanRemaining: 1 };
+  const { state: newState, outcome } = withMockRandom([0.999], () => logic.applySpin(state));
+  assert.equal(outcome, 'miss');
+  assert.deepEqual(newState, { mode: 'normal', jitanRemaining: 0 });
+});
+
+test('applySpin: SR 10R_kessui_success moves to WoU with 1500/1400 payout', () => {
+  const state = { mode: 'sr', jitanRemaining: 53 };
+  const { state: newState, outcome, nominal, actual } = withMockRandom([0, 0.79], () => logic.applySpin(state));
+  assert.equal(outcome, '10R_kessui_success');
+  assert.equal(nominal, 1500);
+  assert.equal(actual, 1400);
+  assert.deepEqual(newState, { mode: 'wou', jitanRemaining: 70 });
+});
+
+test('applySpin: SR sake_hanatachi moves to WoU with sword drive payout including 1500 precedingBonus', () => {
+  const state = { mode: 'sr', jitanRemaining: 53 };
+  const { outcome, nominal, actual } = withMockRandom(
+    [0, 0.999, 0.5, 0.5, 0.5, 0.5, 0.5],
+    () => logic.applySpin(state)
+  );
+  assert.equal(outcome, 'sake_hanatachi');
+  assert.equal(nominal, 1500 + 1500);
+  assert.equal(actual, logic.toActualBalls(3000));
+});
+
+test('applySpin: WoU miss decrements jitanRemaining and stays in WoU', () => {
+  const state = { mode: 'wou', jitanRemaining: 70 };
+  const { state: newState, outcome } = withMockRandom([0.999], () => logic.applySpin(state));
+  assert.equal(outcome, 'miss');
+  assert.deepEqual(newState, { mode: 'wou', jitanRemaining: 69 });
+});
+
+test('applySpin: WoU sword_drive stays in WoU at 70 jitan with sword drive payout (no precedingBonus)', () => {
+  const state = { mode: 'wou', jitanRemaining: 70 };
+  const { outcome, nominal, actual, state: newState } = withMockRandom(
+    [0, 0.999, 0.5, 0.5, 0.5, 0.5, 0.5],
+    () => logic.applySpin(state)
+  );
+  assert.equal(outcome, 'sword_drive');
+  assert.equal(nominal, 1500);
+  assert.equal(actual, 1400);
+  assert.deepEqual(newState, { mode: 'wou', jitanRemaining: 70 });
+});
