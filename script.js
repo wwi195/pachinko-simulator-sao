@@ -168,6 +168,7 @@ function autoSpin(count) {
 
 function handleRushJudge() {
   const { outcome, nominal, actual } = game.pending;
+  addBalls(actual);
   if (outcome === 'niR_53') {
     game.rush = { logicState: { mode: 'sr', jitanRemaining: 53 }, totalHits: 0, nominalBalls: nominal, actualBalls: actual, cycleSpins: 0 };
     game.mode = 'sr';
