@@ -19,6 +19,7 @@ const game = {
   eigyoAlertShown: false,
   detailsExpanded: false,
   swordDriveClicks: 0,
+  lastRankResult: null,
   log: [],
 };
 
@@ -26,6 +27,61 @@ function addLog(text, type = '') {
   game.log.unshift({ text, type });
   if (game.log.length > 50) game.log.pop();
   renderLog();
+}
+
+// ---- ランキング ----
+
+const RANK_KEY = 'saoRankingV1';
+
+function loadRanking() {
+  try {
+    const raw = localStorage.getItem(RANK_KEY);
+    if (!raw) return [];
+    const list = JSON.parse(raw);
+    if (list.some((r) => typeof r.renchan !== 'number')) {
+      saveRanking([]);
+      return [];
+    }
+    return list;
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveRanking(list) {
+  try {
+    localStorage.setItem(RANK_KEY, JSON.stringify(list));
+  } catch (e) {}
+}
+
+function recordRanking(balls, renchan) {
+  const list = loadRanking();
+  const d = new Date();
+  const entry = { balls, renchan, date: `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}` };
+  list.push(entry);
+  list.sort((a, b) => b.balls - a.balls);
+  const trimmed = list.slice(0, 10);
+  saveRanking(trimmed);
+  return { list: trimmed, entry, madeList: trimmed.includes(entry) };
+}
+
+function renderRankingList(list, highlightEntry) {
+  if (list.length === 0) return `<div class="rr-label" style="text-align:center;">まだ記録がありません</div>`;
+  return list.map((r, i) => {
+    const isNew = r === highlightEntry;
+    return `<div class="result-row${isNew ? ' rank-new' : ''}">
+      <span class="rr-label">${i + 1}位${isNew ? ' 🆕' : ''}</span>
+      <span class="rr-val${isNew ? ' gold' : ''}">${r.balls.toLocaleString()}球（${r.renchan}連）<span class="rank-date">${r.date}</span></span>
+    </div>`;
+  }).join('');
+}
+
+function handleShowRanking() {
+  setState('ranking_view');
+}
+
+function handleRankingBack() {
+  setState('normal_idle');
 }
 
 // ---- 球数・投資 ----
@@ -147,6 +203,7 @@ function runRushSpin(opts = {}) {
 
   if (outcome === 'miss') {
     if (newLogicState.mode === 'normal') {
+      game.lastRankResult = recordRanking(Math.round(game.rush.actualBalls), game.rush.totalHits);
       addLog('時短終了 → RUSHリザルトへ');
       setState('rush_result');
       return true;
@@ -341,6 +398,7 @@ function resetGame() {
   game.eigyoAlertShown = false;
   game.detailsExpanded = false;
   game.swordDriveClicks = 0;
+  game.lastRankResult = null;
   game.log = [];
   render();
 }
