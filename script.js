@@ -235,15 +235,35 @@ function runRushSpin(opts = {}) {
 }
 
 function handleRushHitContinue() {
-  if (game.pending.promote) {
-    game.mode = 'wou';
-    game.wouEntryCount++;
-    game.pending = { cutinLabel: 'WoU移行', cutinSub: 'War of Underworld' };
-    addLog('WoU移行！', 'rush');
-    setState('rush_cutin');
-  } else {
+  if (!game.pending.hasKessui) {
     setState(game.rush.logicState.mode === 'sr' ? 'sr_idle' : 'wou_idle');
+    return;
   }
+
+  if (game.pending.kessuiResult === 'fail') {
+    addLog('決意の刃 失敗', 'rush');
+    setState('kessui_fail');
+    setTimeout(() => setState('sr_idle'), 1400);
+    return;
+  }
+
+  game.mode = 'wou';
+  game.wouEntryCount++;
+  addLog('決意の刃 成功！WoUへ', 'rush');
+  setState('kessui_success');
+  setTimeout(() => {
+    if (game.pending.leadsToSakeHanatachi) {
+      setState('sake_hanatachi_reveal');
+      setTimeout(() => {
+        const { finalNominal, finalActual, spinsThisCycle } = game.pending;
+        game.pending = { outcome: 'sake_hanatachi', nominal: finalNominal, actual: finalActual, spinsThisCycle };
+        addLog(`咲け、花たち ＋${finalActual}球`, 'rush');
+        setState('sword_drive_result');
+      }, 1400);
+    } else {
+      setState('wou_idle');
+    }
+  }, 1400);
 }
 
 function handleRushSpin() {
