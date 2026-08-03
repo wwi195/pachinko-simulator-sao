@@ -126,7 +126,7 @@ function handleRushJudge() {
     game.pending = { nominal, actual };
     addLog('突入ならず');
     setState('rush_entry_failed');
-    setTimeout(() => backToNormal(), 300);
+    setTimeout(() => backToNormal(), 600);
   }
 }
 
