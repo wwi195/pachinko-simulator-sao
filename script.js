@@ -498,7 +498,19 @@ function buildScreen(state) {
             <p class="spin-cost-hint">約${tenThousandYenSpins()}回転分</p>
           </div>
         </div>
-        <button class="btn-taiten" onclick="handleTaiten()">退店する</button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-taiten" onclick="handleTaiten()">退店する</button>
+          <button class="btn-taiten" onclick="handleShowRanking()">🏆 ランキング</button>
+        </div>
+      </div>`;
+
+    case 'ranking_view':
+      return `<div class="screen">
+        <p class="rush-result-title">🏆 最高出玉ランキング</p>
+        <div class="rush-result-box">
+          ${renderRankingList(loadRanking())}
+        </div>
+        <button class="btn-sub" onclick="handleRankingBack()" style="margin-top:16px;">戻る</button>
       </div>`;
 
     case 'rush_judge': {
@@ -623,6 +635,7 @@ function buildScreen(state) {
 
     case 'rush_result': {
       const r = game.rush;
+      const rank = game.lastRankResult;
       return `<div class="screen">
         <p class="rush-result-title">RUSH リザルト</p>
         <div class="rush-result-box">
@@ -638,6 +651,11 @@ function buildScreen(state) {
             <span class="rr-label">獲得出玉</span>
             <span class="rr-val">${Math.round(r.actualBalls).toLocaleString()}球</span>
           </div>
+        </div>
+        <div class="rush-result-box">
+          <p class="rr-section">🏆 最高出玉ランキング</p>
+          ${rank && rank.madeList ? '<p class="rank-madelist">ランクイン！</p>' : ''}
+          ${renderRankingList(rank ? rank.list : loadRanking(), rank ? rank.entry : null)}
         </div>
         <button class="btn-action" onclick="handleRushResultEnd()" style="margin-top:16px;">▶ 通常へ戻る</button>
       </div>`;
