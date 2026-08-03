@@ -357,6 +357,7 @@ function render() {
   renderModeBadge();
   renderMainScreen();
   renderRushStats();
+  document.getElementById('sword-drive-overlay').style.display = game.state === 'sword_drive_blackout' ? 'block' : 'none';
 }
 
 function handleToggleDetails() {
@@ -477,9 +478,7 @@ function buildScreen(state) {
       </div>`;
 
     case 'sword_drive_blackout':
-      return `<div class="screen sword-drive-blackout">
-        <div class="sword-drive-swirl"></div>
-      </div>`;
+      return '';
 
     case 'sword_drive_intro': {
       const clicksRemaining = 4 - game.swordDriveClicks;
