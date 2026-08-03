@@ -87,7 +87,7 @@ function runNormalSpin() {
   const nominal = resolveSwordDrive(1500);
   const actual = toActualBalls(nominal);
   addBalls(actual);
-  game.rush = { logicState: { mode: 'wou', jitanRemaining: 70 }, totalHits: 0, nominalBalls: 0, actualBalls: 0, cycleSpins: 0 };
+  game.rush = { logicState: { mode: 'wou', jitanRemaining: 70 }, totalHits: 0, nominalBalls: nominal, actualBalls: actual, cycleSpins: 0 };
   game.mode = 'wou';
   game.rushEntryCount++;
   game.wouEntryCount++;
@@ -115,7 +115,7 @@ function autoSpin(count) {
 function handleRushJudge() {
   const { outcome, nominal, actual } = game.pending;
   if (outcome === 'niR_53') {
-    game.rush = { logicState: { mode: 'sr', jitanRemaining: 53 }, totalHits: 0, nominalBalls: 0, actualBalls: 0, cycleSpins: 0 };
+    game.rush = { logicState: { mode: 'sr', jitanRemaining: 53 }, totalHits: 0, nominalBalls: nominal, actualBalls: actual, cycleSpins: 0 };
     game.mode = 'sr';
     game.rushEntryCount++;
     game.pending = { nominal, actual };
@@ -507,7 +507,7 @@ function buildScreen(state) {
       return `<div class="screen">
         ${swordRushLabel}
         <p class="chain-label">${game.rush.totalHits}連チャン中</p>
-        <p class="rush-sub">獲得出玉 <span>${Math.round(game.rush.actualBalls).toLocaleString()}</span> 球</p>
+        <p class="rush-sub">獲得出玉 <span>${game.rush.nominalBalls.toLocaleString()}</span> 個</p>
         <p class="rush-sub">残り <span>${game.rush.logicState.jitanRemaining}</span> 回</p>
         <div class="rush-spin-btns">
           <button class="btn-rush-spin" onclick="handleRushSpin()">1回転</button>
