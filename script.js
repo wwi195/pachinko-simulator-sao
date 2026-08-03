@@ -508,17 +508,35 @@ function buildScreen(state) {
     }
 
     case 'sr_hit_result': {
-      const { nominal, actual, spinsThisCycle } = game.pending;
+      const { nominal, actual, spinsThisCycle, hasKessui } = game.pending;
+      const kessuiLabel = hasKessui ? '<p class="judge-label">決意の刃発生！</p>' : '';
+      const buttonLabel = hasKessui ? 'ジャッジ' : '▶ 次へ';
       return `<div class="screen">
         <p class="result-sub">${spinsThisCycle}回転で当選</p>
         <p class="chain-label">${game.rush.totalHits}連チャン中</p>
         <div class="vibun-box rush-box">
           <p class="bonus-main premium">10R</p>
           <p class="bonus-sub">${nominal}個（＋${actual}球獲得）</p>
+          ${kessuiLabel}
         </div>
-        <button class="btn-action" onclick="handleRushHitContinue()" style="margin-top:16px;">▶ 次へ</button>
+        <button class="btn-action" onclick="handleRushHitContinue()" style="margin-top:16px;">${buttonLabel}</button>
       </div>`;
     }
+
+    case 'kessui_fail':
+      return `<div class="screen">
+        <p class="result-main lose">失敗</p>
+      </div>`;
+
+    case 'kessui_success':
+      return `<div class="screen">
+        <p class="kessui-success-label">成功！WoUへ</p>
+      </div>`;
+
+    case 'sake_hanatachi_reveal':
+      return `<div class="screen">
+        <p class="sake-hanatachi-label">咲け、花たち</p>
+      </div>`;
 
     case 'sr_miss':
     case 'wou_miss':
