@@ -245,6 +245,29 @@ body {
   margin-top: 6px;
 }
 
+.kessui-success-label {
+  font-size: 26px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: var(--c-ruri);
+}
+
+.sake-hanatachi-label {
+  font-size: 28px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #ff3b3b, #ff9d3b, #ffe93b, #3bff6a, #3bcfff, #6a3bff, #ff3bcf, #ff3b3b);
+  background-size: 400% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rush-rainbow 3s linear infinite;
+}
+@keyframes rush-rainbow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
 /* SWORD RUSH演出テキスト（例外的にかっこいい赤） */
 .sword-rush-label {
   font-size: 26px;
