@@ -327,8 +327,13 @@ function handleSwordDriveAttack() {
     render();
     return;
   }
-  if (game.pending.finalNominal !== undefined) {
+  if (game.pending.finalActual !== undefined) {
+    // 咲け花たち／WoU中神器解放SWORD DRIVE: マスク分は既に加算済みなので差分のみ加算
+    addBalls(game.pending.finalActual - game.pending.actual);
     game.pending = { outcome: game.pending.outcome, nominal: game.pending.finalNominal, actual: game.pending.finalActual };
+  } else {
+    // ぼくの英雄: まだ何も加算していないので全額加算
+    addBalls(game.pending.actual);
   }
   setState('sword_drive_reveal');
 }
