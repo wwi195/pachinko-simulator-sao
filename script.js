@@ -475,26 +475,27 @@ function buildScreen(state) {
         <button class="btn-sub" onclick="backToNormal()" style="margin-top:8px;">続ける</button>
       </div>`;
 
-    case 'sword_drive_result': {
-      const { outcome, nominal, actual, interval, spinsThisCycle } = game.pending;
-      const label = SWORD_DRIVE_LABELS[outcome] || outcome;
-      const intervalLabel = interval !== undefined ? `${interval}回転で大当たり` : `${spinsThisCycle}回転で当選`;
+    case 'sword_drive_intro': {
+      const clicksRemaining = 4 - game.swordDriveClicks;
       return `<div class="screen">
-        <p class="result-sub">${intervalLabel}</p>
-        <div class="vibun-box rush-box">
-          <p class="bonus-main premium">${label}</p>
-          <p class="bonus-sub">${nominal.toLocaleString()}個（＋${actual.toLocaleString()}球獲得）</p>
-        </div>
-        <button class="btn-action" onclick="handleSwordDriveContinue()" style="margin-top:16px;">▶ 次へ</button>
+        <button class="sword-drive-attack-btn" onclick="handleSwordDriveAttack()">SWORD DRIVEを狙え</button>
+        <p class="sword-drive-progress">あと${clicksRemaining}回</p>
       </div>`;
     }
 
-    case 'rush_cutin': {
-      const { cutinLabel, cutinSub } = game.pending;
+    case 'sword_drive_reveal': {
+      const { outcome, nominal, actual } = game.pending;
+      const label = SWORD_DRIVE_LABELS[outcome] || outcome;
+      const thousands = Math.floor(nominal / 1000);
+      const rest = String(nominal % 1000).padStart(3, '0');
       return `<div class="screen">
-        <p class="cutin-flavor">${cutinLabel}！</p>
-        <p class="rush-title">${cutinSub}</p>
-        <button class="btn-action" onclick="handleRushCutinContinue()">▶ 次へ</button>
+        <p class="sword-drive-outcome-label">${label}</p>
+        <p class="sword-drive-title">SWORD DRIVE</p>
+        <p class="sword-drive-amount">
+          <span class="digit-thousands">${thousands}</span><span class="digit-rest">${rest}</span>発獲得
+        </p>
+        <p class="bonus-sub">＋${actual.toLocaleString()}球</p>
+        <button class="btn-action" onclick="handleSwordDriveRevealContinue()" style="margin-top:16px;">▶ 次へ</button>
       </div>`;
     }
 
