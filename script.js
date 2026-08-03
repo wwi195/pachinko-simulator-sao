@@ -219,11 +219,11 @@ function runRushSpin(opts = {}) {
   game.rush.totalHits++;
   game.rush.nominalBalls += nominal;
   game.rush.actualBalls += actual;
-  addBalls(actual);
   const spinsThisCycle = game.rush.cycleSpins;
   game.rush.cycleSpins = 0;
 
   if (outcome === '10R_no_kessui' || outcome === '10R') {
+    addBalls(actual);
     game.pending = { nominal, actual, spinsThisCycle, hasKessui: false };
     addLog(`${spinsThisCycle}回転で当選！ 10R ＋${actual}球`, 'rush');
     setState('sr_hit_result');
@@ -231,6 +231,7 @@ function runRushSpin(opts = {}) {
   }
 
   if (outcome === '10R_kessui_fail') {
+    addBalls(actual);
     game.pending = { nominal, actual, spinsThisCycle, hasKessui: true, kessuiResult: 'fail' };
     addLog(`${spinsThisCycle}回転で当選！ 10R ＋${actual}球`, 'rush');
     setState('sr_hit_result');
@@ -238,6 +239,7 @@ function runRushSpin(opts = {}) {
   }
 
   if (outcome === '10R_kessui_success') {
+    addBalls(actual);
     game.pending = { nominal, actual, spinsThisCycle, hasKessui: true, kessuiResult: 'success', leadsToSakeHanatachi: false };
     addLog(`${spinsThisCycle}回転で当選！ 10R ＋${actual}球`, 'rush');
     setState('sr_hit_result');
@@ -247,6 +249,7 @@ function runRushSpin(opts = {}) {
   if (outcome === 'sake_hanatachi') {
     const displayNominal = 1500;
     const displayActual = toActualBalls(displayNominal);
+    addBalls(displayActual);
     game.pending = {
       nominal: displayNominal,
       actual: displayActual,
@@ -263,17 +266,20 @@ function runRushSpin(opts = {}) {
   }
 
   // sword_drive（WoU中のみ）: まず1500ボーナス画面を経由し、SWORD DRIVE演出で真の金額を発表する
+  const swordDriveDisplayNominal = 1500;
+  const swordDriveDisplayActual = toActualBalls(1500);
+  addBalls(swordDriveDisplayActual);
   game.pending = {
     outcome: 'sword_drive',
-    nominal: 1500,
-    actual: toActualBalls(1500),
+    nominal: swordDriveDisplayNominal,
+    actual: swordDriveDisplayActual,
     finalNominal: nominal,
     finalActual: actual,
     spinsThisCycle,
     hasKessui: false,
     leadsToSwordDrive: true,
   };
-  addLog(`${spinsThisCycle}回転で当選！ 10R ＋${toActualBalls(1500)}球`, 'rush');
+  addLog(`${spinsThisCycle}回転で当選！ 10R ＋${swordDriveDisplayActual}球`, 'rush');
   setState('sr_hit_result');
   return true;
 }
