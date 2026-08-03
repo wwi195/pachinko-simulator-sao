@@ -132,7 +132,6 @@ function runNormalSpin() {
   if (outcome === 'niR_53' || outcome === 'niR_0') {
     const nominal = 300;
     const actual = toActualBalls(nominal);
-    addBalls(actual);
     game.pending = { outcome, nominal, actual, interval };
     addLog(`${interval}回転で大当たり！ 2R ＋${actual}球`, 'win');
     setState('rush_judge');
@@ -142,7 +141,6 @@ function runNormalSpin() {
   // boku_no_hero: WoU直行（ソードドライブ演出、先付け1500）
   const nominal = resolveSwordDrive(1500);
   const actual = toActualBalls(nominal);
-  addBalls(actual);
   game.rush = { logicState: { mode: 'wou', jitanRemaining: 70 }, totalHits: 0, nominalBalls: nominal, actualBalls: actual, cycleSpins: 0 };
   game.mode = 'wou';
   game.rushEntryCount++;
