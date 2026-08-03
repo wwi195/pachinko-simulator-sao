@@ -11,11 +11,13 @@ const game = {
   lastHitSpins: 0,
   normalHitCount: 0,
   rushEntryCount: 0,
+  wouEntryCount: 0,
   totalRushHits: 0,
   rushAllStats: { totalSpins: 0 },
   rush: null,
   pending: {},
   eigyoAlertShown: false,
+  detailsExpanded: false,
   log: [],
 };
 
@@ -43,11 +45,6 @@ function consumeSpinCost() {
 
 function addBalls(n) {
   game.mochiDama += n;
-}
-
-function handleRentalRateChange(value) {
-  game.rentalRate = Number(value);
-  render();
 }
 
 // ---- 通常時ハンドラ ----
@@ -133,10 +130,12 @@ function handleSwordDriveContinue() {
     game.rush = { logicState: { mode: 'wou', jitanRemaining: 70 }, totalHits: 0, nominalBalls: 0, actualBalls: 0, cycleSpins: 0 };
     game.mode = 'wou';
     game.rushEntryCount++;
+    game.wouEntryCount++;
     game.pending = { cutinLabel: 'WoU直行', cutinSub: 'War of Underworld' };
   } else {
     // sake_hanatachi: SRからWoUへ移行
     game.mode = 'wou';
+    game.wouEntryCount++;
     game.pending = { cutinLabel: 'WoU移行', cutinSub: 'War of Underworld' };
   }
   addLog(`${game.pending.cutinLabel}！`, 'rush');
@@ -210,6 +209,7 @@ function runRushSpin(opts = {}) {
 function handleRushHitContinue() {
   if (game.pending.promote) {
     game.mode = 'wou';
+    game.wouEntryCount++;
     game.pending = { cutinLabel: 'WoU移行', cutinSub: 'War of Underworld' };
     addLog('WoU移行！', 'rush');
     setState('rush_cutin');
@@ -275,11 +275,13 @@ function resetGame() {
   game.lastHitSpins = 0;
   game.normalHitCount = 0;
   game.rushEntryCount = 0;
+  game.wouEntryCount = 0;
   game.totalRushHits = 0;
   game.rushAllStats = { totalSpins: 0 };
   game.rush = null;
   game.pending = {};
   game.eigyoAlertShown = false;
+  game.detailsExpanded = false;
   game.log = [];
   render();
 }
