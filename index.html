@@ -30,6 +30,15 @@
 
       <div class="hrow hrow2">
         <div class="money-block">
+          <span class="money-label">収支</span>
+          <span class="money-value red" id="shuushi-value">0</span>
+          <span class="money-unit">円</span>
+        </div>
+        <button class="btn-details-toggle" id="details-toggle" onclick="handleToggleDetails()">詳細▾</button>
+      </div>
+
+      <div class="hrow hrow2-detail" id="hrow2-detail" style="display:none;">
+        <div class="money-block">
           <span class="money-label">持ち球</span>
           <span class="money-value gold" id="mochi-dama">0</span>
           <span class="money-unit">球</span>
@@ -37,11 +46,6 @@
         <div class="money-block">
           <span class="money-label">投資</span>
           <span class="money-value red" id="toushi-value">0</span>
-          <span class="money-unit">円</span>
-        </div>
-        <div class="money-block">
-          <span class="money-label">収支</span>
-          <span class="money-value red" id="shuushi-value">0</span>
           <span class="money-unit">円</span>
         </div>
       </div>
@@ -52,18 +56,20 @@
           <span class="total-hit-block">
             <span class="total-hit-count" id="total-hit-count">0回</span>
           </span>
-          <span class="fee-block" id="fee-block">4.0円</span>
-        </div>
-        <div class="hrow3-normal-line">
-          <span class="hit-label2">通常時初当たり</span>
-          <span class="hit-count" id="normal-first-hit">0回</span>
-          <span class="hit-prob" id="normal-first-prob">1/―</span>
         </div>
         <div class="hrow3-stats">
+          <div class="hit-item">
+            <span class="hit-label2">通常時初当たり</span>
+            <span class="hit-count" id="normal-first-hit">0回</span>
+            <span class="hit-prob" id="normal-first-prob">1/―</span>
+          </div>
           <div class="hit-item">
             <span class="hit-label2">RUSH突入</span>
             <span class="hit-count" id="rush-entry-count">0回</span>
             <span class="rush-entry" id="rush-entry-info">(突入率 0%)</span>
+            <span class="rush-entry-theory">理論50%</span>
+            <span class="hit-label2">WoU突入</span>
+            <span class="hit-count" id="wou-entry-count">0回</span>
           </div>
         </div>
       </div>
