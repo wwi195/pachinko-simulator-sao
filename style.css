@@ -72,9 +72,25 @@ body {
 .esup-value { font-size: 18px; font-weight: bold; color: #e63950; }
 
 .hrow2 {
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.hrow2-detail {
   justify-content: space-around;
   border-bottom: 1px solid #eee;
   padding: 5px 12px;
+}
+
+.btn-details-toggle {
+  background: none;
+  border: none;
+  font-size: 11px;
+  color: #999;
+  cursor: pointer;
+  padding: 4px 6px;
 }
 
 .money-block { display: flex; align-items: baseline; gap: 4px; }
@@ -105,13 +121,6 @@ body {
   letter-spacing: 0.5px;
 }
 
-.hrow3-normal-line {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  margin-bottom: 2px;
-}
-
 .hrow3-stats {
   display: flex;
   gap: 14px;
@@ -130,11 +139,10 @@ body {
 .hit-count  { font-size: 12px; font-weight: bold; color: #333; }
 .hit-prob   { font-size: 9px; color: #aaa; }
 .rush-entry { font-size: 9px; color: #d2694a; }
+.rush-entry-theory { font-size: 9px; color: #999; }
 
 .total-hit-block { display: flex; align-items: baseline; gap: 3px; }
 .total-hit-count { font-size: 12px; font-weight: bold; color: #c9a227; }
-
-.fee-block { font-size: 9px; color: #aaa; white-space: nowrap; }
 
 /* ========== メイン画面 ========== */
 #main-screen {
@@ -292,23 +300,7 @@ body {
 .bonus-sub { font-size: 13px; color: #888; margin-top: 5px; }
 
 /* 一括回転 */
-.spin-rate-block {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 6px;
-}
-.spin-rate-label { font-size: 11px; color: #999; }
-.spin-rate-select {
-  background: #fff;
-  color: #333;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 13px;
-}
-
-.auto-spin-btns { display: flex; gap: 12px; margin-top: 4px; }
+.auto-spin-btns { display: flex; gap: 12px; margin-top: 12px; }
 
 .btn-auto {
   flex: 1;
