@@ -251,6 +251,7 @@ function runRushSpin(opts = {}) {
     const displayActual = toActualBalls(displayNominal);
     addBalls(displayActual);
     game.pending = {
+      outcome: 'sake_hanatachi',
       nominal: displayNominal,
       actual: displayActual,
       finalNominal: nominal,
@@ -310,9 +311,7 @@ function handleRushHitContinue() {
     if (game.pending.leadsToSakeHanatachi) {
       setState('sake_hanatachi_reveal');
       setTimeout(() => {
-        const { finalNominal, finalActual, spinsThisCycle } = game.pending;
-        game.pending = { outcome: 'sake_hanatachi', nominal: finalNominal, actual: finalActual, spinsThisCycle };
-        addLog(`咲け、花たち ＋${finalActual}球`, 'rush');
+        addLog(`咲け、花たち ＋${game.pending.finalActual}球`, 'rush');
         setState('sword_drive_intro');
       }, 1400);
     } else {
