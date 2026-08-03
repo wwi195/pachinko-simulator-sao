@@ -225,7 +225,8 @@ function runRushSpin(opts = {}) {
 function handleRushHitContinue() {
   if (!game.pending.hasKessui) {
     if (game.pending.leadsToSwordDrive) {
-      setState('sword_drive_intro');
+      setState('sword_drive_blackout');
+      setTimeout(() => setState('sword_drive_intro'), 1000);
     } else {
       setState(game.rush.logicState.mode === 'sr' ? 'sr_idle' : 'wou_idle');
     }
@@ -473,6 +474,11 @@ function buildScreen(state) {
       return `<div class="screen">
         <p class="result-main lose">はずれ</p>
         <button class="btn-sub" onclick="backToNormal()" style="margin-top:8px;">続ける</button>
+      </div>`;
+
+    case 'sword_drive_blackout':
+      return `<div class="screen sword-drive-blackout">
+        <div class="sword-drive-swirl"></div>
       </div>`;
 
     case 'sword_drive_intro': {
