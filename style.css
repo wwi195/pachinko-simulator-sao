@@ -515,13 +515,15 @@ body {
 
 .sword-drive-amount { font-size: 34px; font-weight: bold; color: var(--c-ruri); }
 
-.digit-thousands, .digit-rest {
+.digit-fixed { display: inline-block; }
+
+.digit-hundreds, .digit-thousands {
   display: inline-block;
   opacity: 0;
-  animation: digitDrop 0.5s ease forwards;
+  animation: digitDrop 0.4s ease forwards;
 }
-.digit-thousands { animation-delay: 0.2s; }
-.digit-rest      { animation-delay: 0.9s; }
+.digit-hundreds  { animation-delay: 0.4s; }
+.digit-thousands { animation-delay: 1.1s; }
 @keyframes digitDrop {
   from { opacity: 0; transform: translateY(-16px); }
   to   { opacity: 1; transform: translateY(0); }

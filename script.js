@@ -484,17 +484,18 @@ function buildScreen(state) {
     }
 
     case 'sword_drive_reveal': {
-      const { outcome, nominal, actual } = game.pending;
+      const { outcome, nominal } = game.pending;
       const label = SWORD_DRIVE_LABELS[outcome] || outcome;
-      const thousands = Math.floor(nominal / 1000);
-      const rest = String(nominal % 1000).padStart(3, '0');
+      const str = String(nominal);
+      const lastTwo = str.slice(-2);
+      const hundredsDigit = str.slice(-3, -2);
+      const thousandsPart = str.slice(0, -3);
       return `<div class="screen">
         <p class="sword-drive-outcome-label">${label}</p>
         <p class="sword-drive-title">SWORD DRIVE</p>
         <p class="sword-drive-amount">
-          <span class="digit-thousands">${thousands}</span><span class="digit-rest">${rest}</span>発獲得
+          <span class="digit-thousands">${thousandsPart}</span><span class="digit-hundreds">${hundredsDigit}</span><span class="digit-fixed">${lastTwo}</span>発獲得
         </p>
-        <p class="bonus-sub">＋${actual.toLocaleString()}球</p>
         <button class="btn-action" onclick="handleSwordDriveRevealContinue()" style="margin-top:16px;">▶ 次へ</button>
       </div>`;
     }
