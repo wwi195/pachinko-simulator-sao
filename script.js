@@ -78,7 +78,7 @@ function runNormalSpin() {
     addBalls(actual);
     game.pending = { outcome, nominal, actual, interval };
     addLog(`${interval}回転で大当たり！ 2R ＋${actual}球`, 'win');
-    setState('bonus_result');
+    setState('rush_judge');
     return true;
   }
 
@@ -107,16 +107,21 @@ function autoSpin(count) {
   setState('normal_idle');
 }
 
-function handleBonusContinue() {
-  if (game.pending.outcome === 'niR_53') {
+function handleRushJudge() {
+  const { outcome, nominal, actual } = game.pending;
+  if (outcome === 'niR_53') {
     game.rush = { logicState: { mode: 'sr', jitanRemaining: 53 }, totalHits: 0, nominalBalls: 0, actualBalls: 0, cycleSpins: 0 };
     game.mode = 'sr';
     game.rushEntryCount++;
-    game.pending = { cutinLabel: 'SR突入', cutinSub: 'SWORD RUSH' };
-    addLog('SR突入！', 'rush');
-    setState('rush_cutin');
+    game.pending = { nominal, actual };
+    addLog('SWORD RUSH獲得！', 'rush');
+    setState('sword_rush_acquired');
+    setTimeout(() => setState('sr_idle'), 2000);
   } else {
-    backToNormal();
+    game.pending = { nominal, actual };
+    addLog('突入ならず');
+    setState('rush_entry_failed');
+    setTimeout(() => backToNormal(), 2000);
   }
 }
 
@@ -383,15 +388,31 @@ function buildScreen(state) {
         <button class="btn-taiten" onclick="handleTaiten()">退店する</button>
       </div>`;
 
-    case 'bonus_result': {
-      const { nominal, actual, interval } = game.pending;
+    case 'rush_judge': {
+      const { interval } = game.pending;
       return `<div class="screen">
         <p class="result-sub">${interval}回転で大当たり</p>
         <div class="vibun-box">
-          <p class="bonus-main standard">2R</p>
-          <p class="bonus-sub">${nominal}個（＋${actual}球獲得）</p>
+          <p class="bonus-main standard">図柄揃い</p>
+          <p class="judge-label">RUSH突入ジャッジ</p>
         </div>
-        <button class="btn-action" onclick="handleBonusContinue()">▶ 次へ</button>
+        <button class="btn-action" onclick="handleRushJudge()">運命に抗ってやる</button>
+      </div>`;
+    }
+
+    case 'sword_rush_acquired': {
+      const { nominal, actual } = game.pending;
+      return `<div class="screen">
+        <p class="sword-rush-label">SWORD RUSH</p>
+        <p class="bonus-sub">2R ${nominal}個（＋${actual}球）</p>
+      </div>`;
+    }
+
+    case 'rush_entry_failed': {
+      const { nominal, actual } = game.pending;
+      return `<div class="screen">
+        <p class="result-main lose">突入ならず</p>
+        <p class="bonus-sub">2R ${nominal}個（＋${actual}球）</p>
       </div>`;
     }
 
@@ -419,7 +440,7 @@ function buildScreen(state) {
       const { cutinLabel, cutinSub } = game.pending;
       return `<div class="screen">
         <p class="cutin-flavor">${cutinLabel}！</p>
-        <p class="rush-title" style="color:#c9a227;">${cutinSub}</p>
+        <p class="rush-title">${cutinSub}</p>
         <button class="btn-action" onclick="handleRushCutinContinue()">▶ 次へ</button>
       </div>`;
     }
@@ -427,7 +448,9 @@ function buildScreen(state) {
     case 'sr_idle':
     case 'wou_idle': {
       const skipDisabled = game.rush.logicState.jitanRemaining <= 10;
+      const swordRushLabel = game.mode === 'sr' ? '<p class="sword-rush-label">SWORD RUSH</p>' : '';
       return `<div class="screen">
+        ${swordRushLabel}
         <p class="chain-label">${game.rush.totalHits}連チャン中</p>
         <p class="rush-sub">獲得出玉 <span>${Math.round(game.rush.actualBalls).toLocaleString()}</span> 球</p>
         <p class="rush-sub">残り <span>${game.rush.logicState.jitanRemaining}</span> 回</p>
@@ -458,7 +481,7 @@ function buildScreen(state) {
     case 'wou_miss':
       return `<div class="screen">
         <p class="result-main lose">外れ</p>
-        <p style="color:#d2694a; font-size:18px; margin-top:4px;">残り ${game.rush.logicState.jitanRemaining}回</p>
+        <p style="color:var(--c-ruri); font-size:18px; margin-top:4px;">残り ${game.rush.logicState.jitanRemaining}回</p>
         <button class="btn-sub" onclick="handleRushMissContinue()" style="margin-top:12px;">続ける</button>
       </div>`;
 
@@ -486,7 +509,7 @@ function buildScreen(state) {
 
     case 'eigyo_alert':
       return `<div class="screen">
-        <p style="font-size:22px; font-weight:bold; color:#c9a227; text-align:center; line-height:1.6;">
+        <p style="font-size:22px; font-weight:bold; color:var(--c-ruri); text-align:center; line-height:1.6;">
           営業時間終了になりました
         </p>
         <p style="font-size:16px; color:#666; text-align:center;">このまま居座り続けますか？</p>
