@@ -18,6 +18,7 @@ const game = {
   pending: {},
   eigyoAlertShown: false,
   detailsExpanded: false,
+  swordDriveClicks: 0,
   log: [],
 };
 
@@ -86,9 +87,13 @@ function runNormalSpin() {
   const nominal = resolveSwordDrive(1500);
   const actual = toActualBalls(nominal);
   addBalls(actual);
-  game.pending = { outcome: 'boku_no_hero', nominal, actual, interval, promote: true };
+  game.rush = { logicState: { mode: 'wou', jitanRemaining: 70 }, totalHits: 0, nominalBalls: 0, actualBalls: 0, cycleSpins: 0 };
+  game.mode = 'wou';
+  game.rushEntryCount++;
+  game.wouEntryCount++;
+  game.pending = { outcome: 'boku_no_hero', nominal, actual, interval };
   addLog(`${interval}回転で大当たり！ ぼくの英雄 ＋${actual}球`, 'win');
-  setState('sword_drive_result');
+  setState('sword_drive_intro');
   return true;
 }
 
@@ -123,32 +128,6 @@ function handleRushJudge() {
     setState('rush_entry_failed');
     setTimeout(() => backToNormal(), 300);
   }
-}
-
-function handleSwordDriveContinue() {
-  if (!game.pending.promote) {
-    setState('wou_idle');
-    return;
-  }
-  if (!game.rush) {
-    // boku_no_hero: 通常時からWoU直行
-    game.rush = { logicState: { mode: 'wou', jitanRemaining: 70 }, totalHits: 0, nominalBalls: 0, actualBalls: 0, cycleSpins: 0 };
-    game.mode = 'wou';
-    game.rushEntryCount++;
-    game.wouEntryCount++;
-    game.pending = { cutinLabel: 'WoU直行', cutinSub: 'War of Underworld' };
-  } else {
-    // sake_hanatachi: SRからWoUへ移行
-    game.mode = 'wou';
-    game.wouEntryCount++;
-    game.pending = { cutinLabel: 'WoU移行', cutinSub: 'War of Underworld' };
-  }
-  addLog(`${game.pending.cutinLabel}！`, 'rush');
-  setState('rush_cutin');
-}
-
-function handleRushCutinContinue() {
-  setState(game.rush.logicState.mode === 'sr' ? 'sr_idle' : 'wou_idle');
 }
 
 function backToNormal() {
@@ -227,16 +206,29 @@ function runRushSpin(opts = {}) {
     return true;
   }
 
-  // sword_drive（WoU中のみ、既存動作は変更なし）
-  game.pending = { outcome, nominal, actual, spinsThisCycle, promote: false };
-  addLog(`${spinsThisCycle}回転で当選！ ${SWORD_DRIVE_LABELS[outcome]} ＋${actual}球`, 'rush');
-  setState('sword_drive_result');
+  // sword_drive（WoU中のみ）: まず1500ボーナス画面を経由し、SWORD DRIVE演出で真の金額を発表する
+  game.pending = {
+    outcome: 'sword_drive',
+    nominal: 1500,
+    actual: toActualBalls(1500),
+    finalNominal: nominal,
+    finalActual: actual,
+    spinsThisCycle,
+    hasKessui: false,
+    leadsToSwordDrive: true,
+  };
+  addLog(`${spinsThisCycle}回転で当選！ 10R ＋${toActualBalls(1500)}球`, 'rush');
+  setState('sr_hit_result');
   return true;
 }
 
 function handleRushHitContinue() {
   if (!game.pending.hasKessui) {
-    setState(game.rush.logicState.mode === 'sr' ? 'sr_idle' : 'wou_idle');
+    if (game.pending.leadsToSwordDrive) {
+      setState('sword_drive_intro');
+    } else {
+      setState(game.rush.logicState.mode === 'sr' ? 'sr_idle' : 'wou_idle');
+    }
     return;
   }
 
@@ -258,12 +250,29 @@ function handleRushHitContinue() {
         const { finalNominal, finalActual, spinsThisCycle } = game.pending;
         game.pending = { outcome: 'sake_hanatachi', nominal: finalNominal, actual: finalActual, spinsThisCycle };
         addLog(`咲け、花たち ＋${finalActual}球`, 'rush');
-        setState('sword_drive_result');
+        setState('sword_drive_intro');
       }, 1400);
     } else {
       setState('wou_idle');
     }
   }, 1400);
+}
+
+function handleSwordDriveAttack() {
+  game.swordDriveClicks++;
+  if (game.swordDriveClicks < 4) {
+    render();
+    return;
+  }
+  if (game.pending.finalNominal !== undefined) {
+    game.pending = { outcome: game.pending.outcome, nominal: game.pending.finalNominal, actual: game.pending.finalActual };
+  }
+  setState('sword_drive_reveal');
+}
+
+function handleSwordDriveRevealContinue() {
+  game.swordDriveClicks = 0;
+  setState('wou_idle');
 }
 
 function handleRushSpin() {
@@ -330,6 +339,7 @@ function resetGame() {
   game.pending = {};
   game.eigyoAlertShown = false;
   game.detailsExpanded = false;
+  game.swordDriveClicks = 0;
   game.log = [];
   render();
 }
