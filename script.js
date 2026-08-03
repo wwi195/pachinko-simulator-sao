@@ -300,6 +300,11 @@ function render() {
   renderRushStats();
 }
 
+function handleToggleDetails() {
+  game.detailsExpanded = !game.detailsExpanded;
+  render();
+}
+
 function renderHeader() {
   const mochiInt = Math.floor(game.mochiDama);
   document.getElementById('mochi-dama').textContent = mochiInt.toLocaleString();
@@ -324,8 +329,10 @@ function renderHeader() {
   document.getElementById('rush-entry-count').textContent = game.rushEntryCount + '回';
   const rushEntryRate = game.normalHitCount > 0 ? Math.round(game.rushEntryCount / game.normalHitCount * 100) : 0;
   document.getElementById('rush-entry-info').textContent = `(突入率 ${rushEntryRate}%)`;
+  document.getElementById('wou-entry-count').textContent = game.wouEntryCount + '回';
 
-  document.getElementById('fee-block').textContent = `${game.rentalRate.toFixed(1)}円`;
+  document.getElementById('hrow2-detail').style.display = game.detailsExpanded ? 'flex' : 'none';
+  document.getElementById('details-toggle').textContent = game.detailsExpanded ? '詳細▴' : '詳細▾';
 }
 
 function renderModeBadge() {
@@ -344,12 +351,6 @@ function renderModeBadge() {
 
 function renderMainScreen() {
   document.getElementById('main-screen').innerHTML = buildScreen(game.state);
-}
-
-function rentalRateOptionsHtml() {
-  return RENTAL_RATE_TABLE.map(r =>
-    `<option value="${r.yenPerBall}" ${r.yenPerBall === game.rentalRate ? 'selected' : ''}>${r.yenPerBall.toFixed(1)}円${r.yenPerBall === DEFAULT_RENTAL_RATE ? '（等価）' : ''}</option>`
-  ).join('');
 }
 
 function tenThousandYenSpins() {
@@ -373,15 +374,9 @@ function buildScreen(state) {
       return `<div class="screen">
         <button class="btn-start" onclick="handleStart()">START</button>
         <p class="prob-hint">大当たり確率 ${P_NORMAL_HIT_DISPLAY}</p>
-        <div class="spin-rate-block">
-          <span class="spin-rate-label">貸玉料金</span>
-          <select class="spin-rate-select" onchange="handleRentalRateChange(this.value)">
-            ${rentalRateOptionsHtml()}
-          </select>
-        </div>
         <div class="auto-spin-btns">
           <div class="auto-spin-wrap">
-            <button class="btn-auto" onclick="autoSpin(${tenThousandYenSpins()})">1万円分</button>
+            <button class="btn-auto" onclick="autoSpin(${tenThousandYenSpins()})">1万円分回す</button>
             <p class="spin-cost-hint">約${tenThousandYenSpins()}回転分</p>
           </div>
         </div>
