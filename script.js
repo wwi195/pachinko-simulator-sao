@@ -188,25 +188,48 @@ function runRushSpin(opts = {}) {
   const spinsThisCycle = game.rush.cycleSpins;
   game.rush.cycleSpins = 0;
 
-  if (outcome === '10R_no_kessui' || outcome === '10R_kessui_fail' || outcome === '10R') {
-    game.pending = { nominal, actual, spinsThisCycle, promote: false };
+  if (outcome === '10R_no_kessui' || outcome === '10R') {
+    game.pending = { nominal, actual, spinsThisCycle, hasKessui: false };
+    addLog(`${spinsThisCycle}回転で当選！ 10R ＋${actual}球`, 'rush');
+    setState('sr_hit_result');
+    return true;
+  }
+
+  if (outcome === '10R_kessui_fail') {
+    game.pending = { nominal, actual, spinsThisCycle, hasKessui: true, kessuiResult: 'fail' };
     addLog(`${spinsThisCycle}回転で当選！ 10R ＋${actual}球`, 'rush');
     setState('sr_hit_result');
     return true;
   }
 
   if (outcome === '10R_kessui_success') {
-    game.pending = { nominal, actual, spinsThisCycle, promote: true };
-    addLog(`${spinsThisCycle}回転で当選！ 10R（決意の刃成功） ＋${actual}球`, 'rush');
+    game.pending = { nominal, actual, spinsThisCycle, hasKessui: true, kessuiResult: 'success', leadsToSakeHanatachi: false };
+    addLog(`${spinsThisCycle}回転で当選！ 10R ＋${actual}球`, 'rush');
     setState('sr_hit_result');
     return true;
   }
 
-  // sake_hanatachi（SR中）または sword_drive（WoU中）
-  const promote = outcome === 'sake_hanatachi';
-  game.pending = { outcome, nominal, actual, spinsThisCycle, promote };
-  const label = promote ? '咲け、花たち' : '神器解放SWORD DRIVE';
-  addLog(`${spinsThisCycle}回転で当選！ ${label} ＋${actual}球`, 'rush');
+  if (outcome === 'sake_hanatachi') {
+    const displayNominal = 1500;
+    const displayActual = toActualBalls(displayNominal);
+    game.pending = {
+      nominal: displayNominal,
+      actual: displayActual,
+      finalNominal: nominal,
+      finalActual: actual,
+      spinsThisCycle,
+      hasKessui: true,
+      kessuiResult: 'success',
+      leadsToSakeHanatachi: true,
+    };
+    addLog(`${spinsThisCycle}回転で当選！ 10R ＋${displayActual}球`, 'rush');
+    setState('sr_hit_result');
+    return true;
+  }
+
+  // sword_drive（WoU中のみ、既存動作は変更なし）
+  game.pending = { outcome, nominal, actual, spinsThisCycle, promote: false };
+  addLog(`${spinsThisCycle}回転で当選！ ${SWORD_DRIVE_LABELS[outcome]} ＋${actual}球`, 'rush');
   setState('sword_drive_result');
   return true;
 }
