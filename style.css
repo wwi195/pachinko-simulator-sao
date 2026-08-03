@@ -482,3 +482,47 @@ body {
 }
 .log-item.win   { color: var(--c-ruri); }
 .log-item.rush  { color: var(--c-mizu-dark); }
+
+/* SWORD DRIVE演出 */
+.sword-drive-attack-btn {
+  padding: 18px 36px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--c-ruri), var(--c-black));
+  border: 2px solid var(--c-mizu);
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--c-white);
+  letter-spacing: 2px;
+  cursor: pointer;
+  animation: swordDriveFadeIn 1.5s ease;
+}
+@keyframes swordDriveFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.sword-drive-progress { font-size: 12px; color: #999; }
+
+.sword-drive-outcome-label { font-size: 13px; color: #999; }
+
+.sword-drive-title {
+  font-size: 30px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: var(--c-sword-red);
+  text-shadow: 0 2px 8px rgba(192,32,60,0.4);
+}
+
+.sword-drive-amount { font-size: 34px; font-weight: bold; color: var(--c-ruri); }
+
+.digit-thousands, .digit-rest {
+  display: inline-block;
+  opacity: 0;
+  animation: digitDrop 0.5s ease forwards;
+}
+.digit-thousands { animation-delay: 0.2s; }
+.digit-rest      { animation-delay: 0.9s; }
+@keyframes digitDrop {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
