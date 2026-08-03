@@ -116,12 +116,12 @@ function handleRushJudge() {
     game.pending = { nominal, actual };
     addLog('SWORD RUSH獲得！', 'rush');
     setState('sword_rush_acquired');
-    setTimeout(() => setState('sr_idle'), 2000);
+    setTimeout(() => setState('sr_idle'), 1400);
   } else {
     game.pending = { nominal, actual };
     addLog('突入ならず');
     setState('rush_entry_failed');
-    setTimeout(() => backToNormal(), 2000);
+    setTimeout(() => backToNormal(), 1400);
   }
 }
 
