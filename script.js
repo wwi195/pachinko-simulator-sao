@@ -20,6 +20,7 @@ const game = {
   detailsExpanded: false,
   swordDriveClicks: 0,
   lastRankResult: null,
+  hitHistory: [], // 大当たり履歴 [{games, chain}]（新しい順。chain=null はRUSH結果待ち、0はRUSHなし）
   log: [],
 };
 
@@ -126,6 +127,7 @@ function runNormalSpin() {
 
   game.normalHitCount++;
   const interval = game.totalSpins - game.lastHitSpins;
+  game.hitHistory.unshift({ games: interval, chain: outcome === 'niR_0' ? 0 : null });
   game.currentSpins = 0;
   game.lastHitSpins = game.totalSpins;
 
@@ -202,7 +204,10 @@ function runRushSpin(opts = {}) {
 
   if (outcome === 'miss') {
     if (newLogicState.mode === 'normal') {
-      game.lastRankResult = recordRanking(Math.round(game.rush.actualBalls), game.rush.totalHits);
+      // 初当たりを1連目として数える（RUSH中の当たり回数＋1）
+      const last = game.hitHistory[0];
+      if (last && last.chain === null) last.chain = game.rush.totalHits + 1;
+      game.lastRankResult = recordRanking(Math.round(game.rush.actualBalls), game.rush.totalHits + 1);
       addLog('時短終了 → RUSHリザルトへ');
       setState('rush_result');
       return true;
@@ -409,6 +414,7 @@ function resetGame() {
   game.swordDriveClicks = 0;
   game.lastRankResult = null;
   game.log = [];
+  game.hitHistory = [];
   render();
 }
 
@@ -419,11 +425,40 @@ function setState(state) {
   render();
 }
 
+// ---- 大当たり履歴グラフ ----
+const HIST_BLOCK = 100;
+const HIST_MAX_BLOCKS = 7;
+function renderHitGraph() {
+  const el = document.getElementById('hist-cols');
+  if (!el) return;
+  const col = (cls, games, label, idx) => {
+    const blocks = Math.min(HIST_MAX_BLOCKS, Math.max(1, Math.ceil(games / HIST_BLOCK)));
+    const more = games >= HIST_BLOCK * HIST_MAX_BLOCKS ? '<div class="hist-more">▲</div>' : '';
+    return `<div class="hist-col ${cls}">
+      <div class="hist-g">${games}</div>${more}
+      ${'<div class="hist-block"></div>'.repeat(blocks)}
+      <div class="hist-type">${label}</div>
+      <div class="hist-idx">${idx}</div>
+    </div>`;
+  };
+  let html = col('now', game.currentSpins, '現在', '');
+  game.hitHistory.forEach((h, i) => {
+    let cls, label;
+    if (h.chain === null) { cls = 'pending'; label = '…'; }
+    else if (h.chain >= 1) { cls = h.chain >= 10 ? 'big-chain' : 'rush'; label = `${h.chain}連`; }
+    else { cls = 'zugar'; label = '単発'; }
+    html += col(cls, h.games, label, i + 1);
+  });
+  if (game.hitHistory.length === 0) html += '<div class="hist-empty">まだ大当たりがありません</div>';
+  el.innerHTML = html;
+}
+
 function render() {
   renderHeader();
   renderModeBadge();
   renderMainScreen();
   renderRushStats();
+  renderHitGraph();
   document.getElementById('sword-drive-overlay').style.display = game.state === 'sword_drive_blackout' ? 'block' : 'none';
 }
 
@@ -590,7 +625,7 @@ function buildScreen(state) {
       const swordRushLabel = game.mode === 'sr' ? '<p class="sword-rush-label">SWORD RUSH</p>' : '';
       return `<div class="screen">
         ${swordRushLabel}
-        <p class="chain-label">${game.rush.totalHits}連チャン中</p>
+        <p class="chain-label">${game.rush.totalHits + 1}連チャン中</p>
         <p class="rush-sub">獲得出玉 <span>${game.rush.nominalBalls.toLocaleString()}</span> 個</p>
         <p class="rush-sub">残り <span>${game.rush.logicState.jitanRemaining}</span> 回</p>
         <div class="rush-spin-btns">
@@ -609,7 +644,7 @@ function buildScreen(state) {
       const buttonLabel = hasKessui ? 'ジャッジ' : '▶ 次へ';
       return `<div class="screen">
         <p class="result-sub">${spinsThisCycle}回転で当選</p>
-        <p class="chain-label">${game.rush.totalHits}連チャン中</p>
+        <p class="chain-label">${game.rush.totalHits + 1}連チャン中</p>
         <div class="vibun-box rush-box">
           <p class="bonus-main premium">10R</p>
           <p class="bonus-sub">${nominal}個（＋${actual}球獲得）</p>
@@ -649,8 +684,8 @@ function buildScreen(state) {
         <p class="rush-result-title">RUSH リザルト</p>
         <div class="rush-result-box">
           <div class="result-row highlight">
-            <span class="rr-label">連チャン数</span>
-            <span class="rr-val gold">${r.totalHits}回</span>
+            <span class="rr-label">連チャン数（初当たり含む）</span>
+            <span class="rr-val gold">${r.totalHits + 1}連</span>
           </div>
           <div class="result-row">
             <span class="rr-label">TOTAL</span>
