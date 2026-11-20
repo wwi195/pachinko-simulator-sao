@@ -215,7 +215,8 @@ function runRushSpin(opts = {}) {
     }
     if (!opts.silent) {
       addLog(`残り${newLogicState.jitanRemaining}回`);
-      setState(wasMode === 'sr' ? 'sr_miss' : 'wou_miss');
+      // ST中の外れは「外れ」画面を出さず、そのまま続けて押せるようにする
+      handleRushMissContinue();
       return true;
     }
     return false;
